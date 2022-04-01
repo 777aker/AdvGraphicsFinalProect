@@ -1,11 +1,11 @@
-Project
+Final Project
 
 Kelley Kelley
 CSCI 4239/5239 Spring 2022
 
 Final Project for Advanced Computer Graphics
 
-Time spent: 30 min
+Time spent: 2 hr
 
 Key bindings:
 
@@ -15,6 +15,7 @@ Compute shader terrain
 Tesselation shade ground for more texture
 Tree texture noise based
 Voronoi water texture
+
 Particle system snow
 Ray traced lighting
 Shadows

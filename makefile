@@ -28,6 +28,11 @@ x239lib/CSCIx239.a:
 
 # Dependencies
 final.o: final.c x239lib/CSCIx239.h
+sciencefictionnoise.o: sciencefictionnoise.c mylib.h
+
+# Create archive
+mylib.a: sciencefictionnoise.o
+	ar -rcs $@ $^
 
 # Compile rules
 .c.o:
@@ -36,7 +41,7 @@ final.o: final.c x239lib/CSCIx239.h
 	g++ -c $(CFLG) -I /usr/include/opencv4 $<
 
 # Link
-final:final.o x239lib/CSCIx239.a
+final:final.o x239lib/CSCIx239.a mylib.a
 	g++ $(CFLG) -o $@ $^ -lopencv_videoio -lopencv_core $(LIBS)
 
 # Clean
