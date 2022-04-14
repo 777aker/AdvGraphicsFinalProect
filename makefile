@@ -29,9 +29,10 @@ x239lib/CSCIx239.a:
 # Dependencies
 final.o: final.c x239lib/CSCIx239.h
 sciencefictionnoise.o: sciencefictionnoise.c mylib.h
+helpers.o: helpers.c mylib.h
 
 # Create archive
-mylib.a: sciencefictionnoise.o
+mylib.a: sciencefictionnoise.o helpers.o
 	ar -rcs $@ $^
 
 # Compile rules

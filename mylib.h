@@ -12,5 +12,9 @@ float rand2D(float x, float y);
 float rand2Dvec(float coord[2]);
 float rand3D(float x, float y, float z);
 float rand3Dvec(float coord[3]);
+float frand(float min, float max);
+
+// some helper functions
+float frand(float min, float max);
 
 #endif

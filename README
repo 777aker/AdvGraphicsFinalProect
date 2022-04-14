@@ -6,23 +6,6 @@ CSCI 4239/5239 Spring 2022
 Final Project for Advanced Computer Graphics
 
 Time spent: 2 hr
+1:30 pm
 
 Key bindings:
-
-
-Proposal:
-Compute shader terrain
-Tesselation shade ground for more texture
-Tree texture noise based
-Voronoi water texture
-
-Particle system snow
-Ray traced lighting
-Shadows
-Trees on GPU
-
-Stretch Goals:
-Rays of light through leaves
-Funky shaders (like trees move)
-Stars
-Clouds
