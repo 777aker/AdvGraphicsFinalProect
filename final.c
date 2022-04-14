@@ -3,7 +3,16 @@
 * Final Project
 * CSCI 4239/5239 Spring 2022
 * 
-* Key Bindings:
+* Soooo...I could've done what I was originally planning with the whole forest thing, 
+bbuuuttttt, that was really lame to me and felt like I was just putting shaders on my last project 
+and it'd be mostly the same just like, better. And that was lame. So instead, I decided to make a star formation simulator. 
+* 
+* Key bindings:
+esc - quit
+0 - reset view
+r - reset particles
+arrows - change view
+pgup/pgdn - zoom in and out
 */
 #include "mylib.h"
 double dim = 10; // size of the world
