@@ -3,7 +3,7 @@
 #ifndef mylib
 #define mylib
 
-#include "X239lib/CSCIx239.h"
+#include "x239lib/CSCIx239.h"
 #include <time.h> 
 #include <stdbool.h>
 
