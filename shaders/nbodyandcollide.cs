@@ -9,7 +9,7 @@ layout(binding=7) buffer velbuf2 { vec4 vel2[]; };
 layout(binding=8) buffer colbuf { vec4 col[]; };
 
 // work group size
-layout(local_size_x = 1024) in;
+layout(local_size_x = 512) in;
 
 // time step
 const float dt = 0.1;

@@ -113,8 +113,8 @@ void InitParticles() {
 	// get max workgroup size and count
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &ng);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &nw);
-	if (ng > 16) ng = 8;
-	if (nw > 1024) nw = 1024;
+	if (ng > 16) ng = 16;
+	if (nw > 512) nw = 512;
 	n = nw * ng;
 
 	// initialize position buffers
