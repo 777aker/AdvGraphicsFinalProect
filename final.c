@@ -23,12 +23,9 @@ int n; // number of particles
 double asp = 1; // aspect ratio
 int computeshader; // compute shader program
 int colorshader; // shader program
-unsigned int posbuf1; // position buffers
-unsigned int posbuf2; // double buffer
-unsigned int velbuf1; // velocity buffers
-unsigned int velbuf2; // double buffer
+unsigned int posbuf; // position buffers
+unsigned int velbuf; // double buffer
 unsigned int colbuf; // color buffer
-int buf; // buffer value
 
 typedef struct {
 	union { float x; float r; };
@@ -37,51 +34,53 @@ typedef struct {
 	union { float w; float a; };
 } vec4;
 
-// particles
+const float icosahedron_data[] = {
+	0.894, 0.000, 0.447, 1,		0.724, 0.526,-0.447, 1,		0.724,-0.526,-0.447, 1,
+	0.276,-0.851, 0.447, 1,		0.724,-0.526,-0.447, 1,		-0.276,-0.851,-0.447, 1,
+	-0.724,-0.526, 0.447, 1,	-0.276,-0.851,-0.447, 1,	-0.894, 0.000,-0.447, 1,
+	-0.724, 0.526, 0.447, 1,	-0.894, 0.000,-0.447, 1,	-0.276, 0.851,-0.447, 1,
+	0.276, 0.851, 0.447, 1,		-0.276, 0.851,-0.447, 1,	0.724, 0.526,-0.447, 1,
+	0.276,-0.851, 0.447, 1,		0.894, 0.000, 0.447, 1,		0.724,-0.526,-0.447, 1,
+	-0.724,-0.526, 0.447, 1,	0.276,-0.851, 0.447, 1,		-0.276,-0.851,-0.447, 1,
+	-0.724, 0.526, 0.447, 1,	-0.724,-0.526, 0.447, 1,	-0.894, 0.000,-0.447, 1,
+	 0.276, 0.851, 0.447, 1,	-0.724, 0.526, 0.447, 1,	-0.276, 0.851,-0.447, 1,
+	0.894, 0.000, 0.447, 1,		0.276, 0.851, 0.447, 1,		0.724, 0.526,-0.447, 1,
+	0.000, 0.000,-1.000, 1,		0.724,-0.526,-0.447, 1,		0.724, 0.526,-0.447, 1,
+	0.000, 0.000,-1.000, 1,		-0.276,-0.851,-0.447, 1,	0.724,-0.526,-0.447, 1,
+	0.000, 0.000,-1.000, 1,		-0.894, 0.000,-0.447, 1,	-0.276,-0.851,-0.447, 1,
+	0.000, 0.000,-1.000, 1,		-0.276, 0.851,-0.447, 1,	-0.894, 0.000,-0.447, 1,
+	0.000, 0.000,-1.000, 1,		0.724, 0.526,-0.447, 1,		-0.276, 0.851,-0.447, 1,
+	0.894, 0.000, 0.447, 1,		0.276,-0.851, 0.447, 1,		0.000, 0.000, 1.000, 1,
+	0.276, 0.851, 0.447, 1,		0.894, 0.000, 0.447, 1,		0.000, 0.000, 1.000, 1,
+	-0.724, 0.526, 0.447, 1		0.276, 0.851, 0.447, 1,		0.000, 0.000, 1.000, 1,
+	-0.724,-0.526, 0.447, 1,	-0.724, 0.526, 0.447, 1,	0.000, 0.000, 1.000, 1,
+	0.276,-0.851, 0.447, 1,		-0.724,-0.526, 0.447, 1,	0.000, 0.000, 1.000, 1
+};
+
+
+// reset particles
 void ResetParticles() {
-	vec4 *pos1, *pos2, *vel1, *vel2, *col;
+	vec4 *pos, *vel, *col;
 	// reset position
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
-	pos1 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf);
+	pos = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++) {
-		pos1[i].x = frand(-10, 10);
-		pos1[i].y = frand(-10, 10);
-		pos1[i].z = frand(-10, 10);
-		pos1[i].w = 1;
-	}
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf2);
-	pos2 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-	for (int i = 0; i < n; i++) {
-		pos2[i].x = pos1[i].x;
-		pos2[i].y = pos1[i].y;
-		pos2[i].z = pos1[i].z;
-		pos2[i].w = 1;
+		pos[i].x = frand(-10, 10);
+		pos[i].y = frand(-10, 10);
+		pos[i].z = frand(-10, 10);
+		pos[i].w = 1;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	//  Reset velocities
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf1);
-	vel1 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf);
+	vel = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++)
 	{
-		vel1[i].x = frand(-10, +10);
-		vel1[i].y = frand(-10, +10);
-		vel1[i].z = frand(-10, +10);
-		vel1[i].w = 0;
-	}
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-	//  Reset velocities
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf2);
-	vel2 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-	for (int i = 0; i < n; i++)
-	{
-		vel2[i].x = vel1[i].x;
-		vel2[i].y = vel1[i].y;
-		vel2[i].z = vel1[i].z;
-		vel2[i].w = 0;
+		vel[i].x = frand(-10, +10);
+		vel[i].y = frand(-10, +10);
+		vel[i].z = frand(-10, +10);
+		vel[i].w = 0;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -98,11 +97,9 @@ void ResetParticles() {
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	//  Set buffer base
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf2);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf1);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf2);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, colbuf);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, velbuf);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, colbuf);
 
 	//  Unset buffer
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -118,19 +115,13 @@ void InitParticles() {
 	n = nw * ng;
 
 	// initialize position buffers
-	glGenBuffers(1, &posbuf1);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
-	glGenBuffers(1, &posbuf2);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf2);
+	glGenBuffers(1, &posbuf);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 
 	// initialize velocity buffer
-	glGenBuffers(1, &velbuf1);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf1);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
-	glGenBuffers(1, &velbuf2);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf2);
+	glGenBuffers(1, &velbuf);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 
 	// initialize color buffer
@@ -138,6 +129,10 @@ void InitParticles() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, colbuf);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	// initialize sphere stuff
+	
+
 
 	// reset buffer positions
 	ResetParticles();
@@ -147,20 +142,13 @@ void InitParticles() {
 void DrawParticles() {
 	// set shader
 	glUseProgram(colorshader);
-	// set up texture and size
-	int id = glGetUniformLocation(colorshader, "star");
-	if(id>=0) glUniform1i(id, 0);
-	id = glGetUniformLocation(colorshader, "size");
-	if(id>=0) glUniform1f(id, .1);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_BLEND);
-	// set particle size
-	glPointSize(1);
+
+
+	/*
 	// vertex array
-	if (buf)
-		glBindBuffer(GL_ARRAY_BUFFER, posbuf1);
-	else
-		glBindBuffer(GL_ARRAY_BUFFER, posbuf2);
+	unsigned int sphereVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, posbuf);
 	glVertexPointer(4, GL_FLOAT, 0, (void*)0);
 	// color array
 	glBindBuffer(GL_ARRAY_BUFFER, colbuf);
@@ -175,8 +163,8 @@ void DrawParticles() {
 	glDisableClientState(GL_COLOR_ARRAY);
 	// reset buffer
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// turn off blend
-	glDisable(GL_BLEND);
+	*/
+	
 	// return to default shader
 	glUseProgram(0);
 }
@@ -184,19 +172,6 @@ void DrawParticles() {
 // run compute shader
 void compute() {
 	glUseProgram(computeshader);
-	if (buf) {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf2);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf1);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf2);
-	}
-	else {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf1);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf2);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf1);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf2);
-	}
-	buf = (buf + 1) % 2;
 	int id = glGetUniformLocation(computeshader, "n");
 	//printf("%i", n);
 	glUniform1i(id, n);
@@ -209,7 +184,8 @@ void compute() {
 // refresh display
 void display(GLFWwindow* window) {
 	// erase window and depth buffer
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 	// set eye position
 	View(th, ph, 55, dim);
 
@@ -219,6 +195,7 @@ void display(GLFWwindow* window) {
 	// draw the particles
 	DrawParticles();
 
+	glDisable(GL_DEPTH_TEST);
 	// display parameters
 	glWindowPos2i(5, 5);
 	Print("FPS=%d, work groups=%i, work size=%i, Count %i", FramesPerSecond(), ng, nw, n);
@@ -297,16 +274,16 @@ int CreateShaderProgCompute(char* file) {
 int main(int argc, char* argv[]) {
 	// initialize GLFW
 	GLFWwindow* window = InitWindow("Kelley Kelley Final Project", 1, 600, 600, &reshape, &key);
-	
+
 	// compute shader
 	computeshader = CreateShaderProgCompute("shaders/nbodyandcollide.cs");
-	// texturing shader
-	colorshader = CreateShaderProgGeom("shaders/nbodyandcollide.vert", "shaders/nbodyandcollide.geom", "shaders/nbodyandcollide.frag");
+	// shader
+	colorshader = CreateShaderProg("shaders/nbodyandcollide.vert", "shaders/nbodyandcollide.frag");
 	// init particles
 	InitParticles();
 
 	// star texture
-	LoadTexBMP("star.bmp");
+	//LoadTexBMP("star.bmp");
 
 	// event loop
 	ErrCheck("init");

@@ -4,9 +4,7 @@
 // array positions
 layout(binding=4) buffer posbuf1 { vec4 pos1[]; };
 layout(binding=5) buffer posbuf2 { vec4 pos2[]; };
-layout(binding=6) buffer velbuf1 { vec4 vel1[]; };
-layout(binding=7) buffer velbuf2 { vec4 vel2[]; };
-layout(binding=8) buffer colbuf { vec4 col[]; };
+layout(binding=6) buffer colbuf { vec4 col[]; };
 
 // work group size
 layout(local_size_x = 512) in;
@@ -23,6 +21,7 @@ void main()
     // global thread id
     uint gid = gl_GlobalInvocationID.x;
     
+    /*
     float dt = 0.002;
     vec3 F = vec3(0,0,0);
     float density = 0;
@@ -45,4 +44,5 @@ void main()
     pos2[gid].xyz = pos1[gid].xyz + dt*vel1[gid].xyz;
     col[gid].r = density*.1;
     col[gid].b = 1-density*.1;
+    */
 }

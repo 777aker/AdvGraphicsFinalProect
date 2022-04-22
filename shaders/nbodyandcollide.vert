@@ -1,10 +1,17 @@
 //  nBody Vertex shader
-#version 120
+#version 400 core
+
+layout(location = 4) in vec4 translation;
+layout(location = 6) in vec4 color;
+
+out vec4 Color;
+
+in vec4 Vertex;
 
 void main()
 {
    //  Remember the color
-   gl_FrontColor = gl_Color;
-   //  Defer all transformations to geometry shader
-   gl_Position   = gl_Vertex;
+   Color = color;
+   //  Translate sphere
+   gl_Position = Vertex;// + translation;
 }
