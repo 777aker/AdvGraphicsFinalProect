@@ -52,11 +52,15 @@ const float icosahedron_data[] = {
 	0.000, 0.000,-1.000, 1,		0.724, 0.526,-0.447, 1,		-0.276, 0.851,-0.447, 1,
 	0.894, 0.000, 0.447, 1,		0.276,-0.851, 0.447, 1,		0.000, 0.000, 1.000, 1,
 	0.276, 0.851, 0.447, 1,		0.894, 0.000, 0.447, 1,		0.000, 0.000, 1.000, 1,
-	-0.724, 0.526, 0.447, 1		0.276, 0.851, 0.447, 1,		0.000, 0.000, 1.000, 1,
+	-0.724, 0.526, 0.447, 1,	0.276, 0.851, 0.447, 1,		0.000, 0.000, 1.000, 1,
 	-0.724,-0.526, 0.447, 1,	-0.724, 0.526, 0.447, 1,	0.000, 0.000, 1.000, 1,
 	0.276,-0.851, 0.447, 1,		-0.724,-0.526, 0.447, 1,	0.000, 0.000, 1.000, 1
 };
-
+unsigned int icoVBO;
+unsigned int icoVAO;
+unsigned int icoTriangles = 20;
+unsigned int icoVertices = 60;
+unsigned int icoSize = 240;
 
 // reset particles
 void ResetParticles() {
@@ -130,9 +134,23 @@ void InitParticles() {
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	// initialize sphere stuff
+	// initialize ico stuff
+	glGenBuffers(1, &icoVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, icoVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(icosahedron_data), icosahedron_data, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
-
+	glUseProgram(colorshader);
+	glGenVertexArrays(1, &icoVAO);
+	glBindVertexArray(icoVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, icoVBO);
+	int loc = glGetAttribLocation(colorshader, "Vertex");
+	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
+	glEnableVertexAttribArray(loc);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
 
 	// reset buffer positions
 	ResetParticles();
@@ -143,7 +161,9 @@ void DrawParticles() {
 	// set shader
 	glUseProgram(colorshader);
 
-
+	glBindVertexArray(icoVAO);
+	glDrawArrays(GL_TRIANGLES, 0, icoSize);
+	glBindVertexArray(0);
 	/*
 	// vertex array
 	unsigned int sphereVBO;
@@ -273,7 +293,7 @@ int CreateShaderProgCompute(char* file) {
 // main program, the beginning of it all
 int main(int argc, char* argv[]) {
 	// initialize GLFW
-	GLFWwindow* window = InitWindow("Kelley Kelley Final Project", 1, 600, 600, &reshape, &key);
+	GLFWwindow* window = InitWindow("Kelley Kelley Final Project", 0, 600, 600, &reshape, &key);
 
 	// compute shader
 	computeshader = CreateShaderProgCompute("shaders/nbodyandcollide.cs");
