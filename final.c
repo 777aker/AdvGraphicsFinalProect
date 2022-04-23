@@ -76,13 +76,13 @@ void ResetParticles() {
 		if (mode == 0) {
 			if (i % 10 == 0) {
 				pos1[i].x = frand(-50, 50);
-				pos1[i].y = frand(-50, 50);
+				pos1[i].y = -20;
 				pos1[i].z = frand(-50, 50);
 				pos1[i].w = 1;
 			}
 			else {
 				pos1[i].x = frand(-100, 100);
-				pos1[i].y = frand(-100, 100);
+				pos1[i].y = frand(-10, 50);
 				pos1[i].z = frand(-100, 100);
 				pos1[i].w = 1;
 			}
@@ -106,15 +106,15 @@ void ResetParticles() {
 	for (int i = 0; i < n; i++)
 	{
 		if (mode == 0) {
-			if (i % 100 == 0) {
+			if (i % 10 == 0) {
 				vel1[i].x = 0;
-				vel1[i].y = .05;
+				vel1[i].y = 0;
 				vel1[i].z = 0;
 				vel1[i].w = 0;
 			}
 			else {
 				vel1[i].x = 0;
-				vel1[i].y = 0;
+				vel1[i].y = .05;
 				vel1[i].z = 0;
 				vel1[i].w = 0;
 			}

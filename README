@@ -27,6 +27,7 @@ https://courses.lumenlearning.com/boundless-physics/chapter/collisions/
 4 hrs faking physics until it looked like what I wanted
 Basically the physics in the compute shader are mostly copied from ex22 but
 I did a lot of tweaking for the collisions
+12 hours trying to do collisions
 
 Key bindings:
 esc - quit

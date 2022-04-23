@@ -29,47 +29,53 @@ bool collide(uint effect, int other)
     if(length(DVD) > 2)
         return false;
 
-    if(length(vel1[other].xyz) == 0)
+    float xyz = length(D) * length(vel1[other].xyz);
+    if (xyz == 0)
     {
         vel2[effect].xyz = vel1[other].xyz;
         return true;
     }
-
-    float xyz = acos(
-        mod(
-        dot(D, vel1[other].xyz) / 
-        sqrt((D.x + D.y + D.z)*(vel1[other].x + vel1[other].y + vel1[other].z))
-        , 3.14)
+    
+    xyz = acos(
+        fract(
+        dot(D, vel1[other].xyz) /
+        xyz
+        )
         );
+    
     float vcs = length(vel1[other].xyz)*cos(xyz);
 
-
-    float xz;
-    if (length(vel1[other].xz) == 0)
+    
+    float xz = length(D.xz) * length(vel1[other].xz);
+    if (xz == 0)
     {
         xz = acos(0);
     } else
     {
+        
         xz = acos(
-        mod(
+        fract(
         dot(D.xz, vel1[effect].xz) /
-        sqrt((D.x + D.z) * (vel1[other].x + vel1[other].z))
-        , 3.14)
+        xz
+        )
         );
+        
     }
 
-    float xy;
-    if (length(vel1[other].xy) == 0)
+    float xy = length(D.xy) * length(vel1[other].xy);
+    if (xy == 0)
     {
         xy = acos(0);
     } else
     {
+        
         xy = acos(
-        mod(
+        fract(
         dot(D.xy, vel1[effect].xy) /
-        sqrt((D.x + D.y) * (vel1[other].x + vel1[other].y))
-        , 3.14)
+        xy
+        )
         );
+        
     }
     vec3 vc = vec3(0, 0, 0);
     vc.x = vcs * sin(xz) * cos(xy);
