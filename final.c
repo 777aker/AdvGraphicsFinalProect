@@ -69,9 +69,9 @@ void ResetParticles() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf);
 	pos = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++) {
-		pos[i].x = frand(-10, 10);
-		pos[i].y = frand(-10, 10);
-		pos[i].z = frand(-10, 10);
+		pos[i].x = frand(-50, 50);
+		pos[i].y = frand(-50, 50);
+		pos[i].z = frand(-50, 50);
 		pos[i].w = 1;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -147,9 +147,22 @@ void InitParticles() {
 	int loc = glGetAttribLocation(colorshader, "Vertex");
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
+
+	glBindBuffer(GL_ARRAY_BUFFER, posbuf);
+	loc = glGetAttribLocation(colorshader, "translation");
+	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
+	glEnableVertexAttribArray(loc);
+	glVertexAttribDivisor(loc, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, colbuf);
+	loc = glGetAttribLocation(colorshader, "color");
+	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
+	glEnableVertexAttribArray(loc);
+	glVertexAttribDivisor(loc, 1);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
 	glUseProgram(0);
 
 	// reset buffer positions
@@ -161,29 +174,29 @@ void DrawParticles() {
 	// set shader
 	glUseProgram(colorshader);
 
+	// projection matrix
+	float proj[16];
+	mat4identity(proj);
+	mat4ortho(proj, -dim * asp, +dim * asp, -dim, +dim, -dim, +dim);
+	// view matrix
+	float view[16];
+	mat4identity(view);
+	mat4rotate(view, ph, 1, 0, 0);
+	mat4rotate(view, th, 0, 1, 0);
+	// modelview matrix
+	float modelview[16];
+	mat4copy(modelview, view);
+	mat4translate(modelview, 0, 0, 0.5);
+
+	int id = glGetUniformLocation(colorshader, "ProjectionMatrix");
+	glUniformMatrix4fv(id, 1, 0, proj);
+	id = glGetUniformLocation(colorshader, "ModelViewMatrix");
+	glUniformMatrix4fv(id, 1, 0, modelview);
+
+	// draw the ico
 	glBindVertexArray(icoVAO);
-	glDrawArrays(GL_TRIANGLES, 0, icoSize);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, icoSize, n);
 	glBindVertexArray(0);
-	/*
-	// vertex array
-	unsigned int sphereVBO;
-	glGenBuffers(1, &instanceVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, posbuf);
-	glVertexPointer(4, GL_FLOAT, 0, (void*)0);
-	// color array
-	glBindBuffer(GL_ARRAY_BUFFER, colbuf);
-	glColorPointer(4, GL_FLOAT, 0, (void*)0);
-	// enable arrays used by drawarrays
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	// draw arrays
-	glDrawArrays(GL_POINTS, 0, n);
-	// disable arrays
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	// reset buffer
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	*/
 	
 	// return to default shader
 	glUseProgram(0);

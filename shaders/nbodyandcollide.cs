@@ -2,8 +2,8 @@
 #version 440 compatibility
 
 // array positions
-layout(binding=4) buffer posbuf1 { vec4 pos1[]; };
-layout(binding=5) buffer posbuf2 { vec4 pos2[]; };
+layout(binding=4) buffer posbuf { vec4 pos[]; };
+layout(binding=5) buffer velbuf { vec4 vel[]; };
 layout(binding=6) buffer colbuf { vec4 col[]; };
 
 // work group size
@@ -21,6 +21,9 @@ void main()
     // global thread id
     uint gid = gl_GlobalInvocationID.x;
     
+    float dt = 0.002;
+    pos[gid].xyz += vel[gid].xyz * dt;
+
     /*
     float dt = 0.002;
     vec3 F = vec3(0,0,0);
