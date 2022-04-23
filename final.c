@@ -15,7 +15,7 @@ arrows - change view
 pgup/pgdn - zoom in and out
 */
 #include "mylib.h"
-double dim = 10; // size of the world
+double dim = 50; // size of the world
 int th = 0; // azimuth of view angle
 int ph = 0; // elevation of view angle
 int nw, ng; // work group size and count
@@ -23,9 +23,13 @@ int n; // number of particles
 double asp = 1; // aspect ratio
 int computeshader; // compute shader program
 int colorshader; // shader program
-unsigned int posbuf; // position buffers
-unsigned int velbuf; // double buffer
+unsigned int posbuf1; // position buffers
+unsigned int posbuf2;
+unsigned int velbuf1; // double buffer
+unsigned int velbuf2;
 unsigned int colbuf; // color buffer
+int buf; // buffer value
+int mode = 0;
 
 typedef struct {
 	union { float x; float r; };
@@ -64,27 +68,68 @@ unsigned int icoSize = 240;
 
 // reset particles
 void ResetParticles() {
-	vec4 *pos, *vel, *col;
+	vec4 *pos1, *pos2, *vel1, *vel2, *col;
 	// reset position
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf);
-	pos = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
+	pos1 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++) {
-		pos[i].x = frand(-50, 50);
-		pos[i].y = frand(-50, 50);
-		pos[i].z = frand(-50, 50);
-		pos[i].w = 1;
+		if (mode == 0) {
+			if (i % 10 == 0) {
+				pos1[i].x = frand(-50, 50);
+				pos1[i].y = frand(-50, 50);
+				pos1[i].z = frand(-50, 50);
+				pos1[i].w = 1;
+			}
+			else {
+				pos1[i].x = frand(-100, 100);
+				pos1[i].y = frand(-100, 100);
+				pos1[i].z = frand(-100, 100);
+				pos1[i].w = 1;
+			}
+		}
+	}
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf2);
+	pos2 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	for (int i = 0; i < n; i++) {
+		pos2[i].x = pos1[i].x;
+		pos2[i].y = pos1[i].y;
+		pos2[i].z = pos1[i].z;
+		pos2[i].w = 1;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	//  Reset velocities
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf);
-	vel = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf1);
+	vel1 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++)
 	{
-		vel[i].x = frand(-10, +10);
-		vel[i].y = frand(-10, +10);
-		vel[i].z = frand(-10, +10);
-		vel[i].w = 0;
+		if (mode == 0) {
+			if (i % 100 == 0) {
+				vel1[i].x = 0;
+				vel1[i].y = .05;
+				vel1[i].z = 0;
+				vel1[i].w = 0;
+			}
+			else {
+				vel1[i].x = 0;
+				vel1[i].y = 0;
+				vel1[i].z = 0;
+				vel1[i].w = 0;
+			}
+		}
+	}
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf2);
+	vel2 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	for (int i = 0; i < n; i++)
+	{
+		vel2[i].x = vel1[i].x;
+		vel2[i].y = vel1[i].y;
+		vel2[i].z = vel1[i].z;
+		vel2[i].w = 0;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -101,9 +146,11 @@ void ResetParticles() {
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	//  Set buffer base
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, velbuf);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, colbuf);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf2);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf1);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf2);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, colbuf);
 
 	//  Unset buffer
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -114,18 +161,24 @@ void InitParticles() {
 	// get max workgroup size and count
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &ng);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &nw);
-	if (ng > 16) ng = 16;
+	if (ng > 16) ng = 4;
 	if (nw > 512) nw = 512;
 	n = nw * ng;
 
 	// initialize position buffers
-	glGenBuffers(1, &posbuf);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf);
+	glGenBuffers(1, &posbuf1);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
+	glGenBuffers(1, &posbuf2);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf2);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 
 	// initialize velocity buffer
-	glGenBuffers(1, &velbuf);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf);
+	glGenBuffers(1, &velbuf1);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf1);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
+	glGenBuffers(1, &velbuf2);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf2);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, n * sizeof(vec4), NULL, GL_STATIC_DRAW);
 
 	// initialize color buffer
@@ -148,8 +201,13 @@ void InitParticles() {
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
 
-	glBindBuffer(GL_ARRAY_BUFFER, posbuf);
-	loc = glGetAttribLocation(colorshader, "translation");
+	glBindBuffer(GL_ARRAY_BUFFER, posbuf1);
+	loc = glGetAttribLocation(colorshader, "translation1");
+	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
+	glEnableVertexAttribArray(loc);
+	glVertexAttribDivisor(loc, 1);
+	glBindBuffer(GL_ARRAY_BUFFER, posbuf2);
+	loc = glGetAttribLocation(colorshader, "translation2");
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
 	glVertexAttribDivisor(loc, 1);
@@ -192,6 +250,8 @@ void DrawParticles() {
 	glUniformMatrix4fv(id, 1, 0, proj);
 	id = glGetUniformLocation(colorshader, "ModelViewMatrix");
 	glUniformMatrix4fv(id, 1, 0, modelview);
+	id = glGetUniformLocation(colorshader, "buf");
+	glUniform1i(id, buf);
 
 	// draw the ico
 	glBindVertexArray(icoVAO);
@@ -205,6 +265,19 @@ void DrawParticles() {
 // run compute shader
 void compute() {
 	glUseProgram(computeshader);
+	if (buf) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf2);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf1);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf2);
+	}
+	else {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf1);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf2);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf1);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf2);
+	}
+	buf = (buf + 1) % 2;
 	int id = glGetUniformLocation(computeshader, "n");
 	//printf("%i", n);
 	glUniform1i(id, n);

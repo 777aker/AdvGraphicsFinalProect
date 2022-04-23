@@ -2,27 +2,101 @@
 #version 440 compatibility
 
 // array positions
-layout(binding=4) buffer posbuf { vec4 pos[]; };
-layout(binding=5) buffer velbuf { vec4 vel[]; };
-layout(binding=6) buffer colbuf { vec4 col[]; };
+layout(binding = 4) buffer posbuf1 { vec4 pos1 []; };
+layout(binding = 5) buffer posbuf2 { vec4 pos2 []; };
+layout(binding = 6) buffer velbuf1 { vec4 vel1 []; };
+layout(binding = 7) buffer velbuf2 { vec4 vel2 []; };
+layout(binding = 8) buffer colbuf { vec4 col []; };
 
 // work group size
 layout(local_size_x = 512) in;
 
-// time step
-const float dt = 0.1;
-
 // array size
 uniform int n;
+
+vec3 project(vec3 u, vec3 v)
+{
+    return v * (dot(u,v) / dot(v, v));
+}
+
+bool collide(uint effect, int other)
+{
+    vec3 D = pos1[other].xyz - pos1[effect].xyz;
+    vec3 DV = vel1[other].xyz - vel1[effect].xyz;
+    vec3 DVD = abs(D + DV);
+    if(DVD.x > 2 || DVD.y > 2 || DVD.z > 2)
+        return false;
+    if(length(DVD) > 2)
+        return false;
+
+    if(length(vel1[other].xyz) == 0)
+    {
+        vel2[effect].xyz = vel1[other].xyz;
+        return true;
+    }
+
+    float xyz = acos(
+        mod(
+        dot(D, vel1[other].xyz) / 
+        sqrt((D.x + D.y + D.z)*(vel1[other].x + vel1[other].y + vel1[other].z))
+        , 3.14)
+        );
+    float vcs = length(vel1[other].xyz)*cos(xyz);
+
+
+    float xz;
+    if (length(vel1[other].xz) == 0)
+    {
+        xz = acos(0);
+    } else
+    {
+        xz = acos(
+        mod(
+        dot(D.xz, vel1[effect].xz) /
+        sqrt((D.x + D.z) * (vel1[other].x + vel1[other].z))
+        , 3.14)
+        );
+    }
+
+    float xy;
+    if (length(vel1[other].xy) == 0)
+    {
+        xy = acos(0);
+    } else
+    {
+        xy = acos(
+        mod(
+        dot(D.xy, vel1[effect].xy) /
+        sqrt((D.x + D.y) * (vel1[other].x + vel1[other].y))
+        , 3.14)
+        );
+    }
+    vec3 vc = vec3(0, 0, 0);
+    vc.x = vcs * sin(xz) * cos(xy);
+    vc.y = vcs * sin(xz) * sin(xy);
+    vc.z = vcs * cos(xz);
+    vel2[effect].xyz = vel1[effect].xyz - vc;
+
+    return true;
+}
 
 // compute shader
 void main()
 {
     // global thread id
     uint gid = gl_GlobalInvocationID.x;
-    
-    float dt = 0.002;
-    pos[gid].xyz += vel[gid].xyz * dt;
+
+    for(int i = 0; i < n; i++)
+    {
+        if(i != gid)
+        {
+            if(collide(gid, i))
+                break;
+        }
+    }
+
+    pos1[gid].xyz += vel1[gid].xyz;
+    pos2[gid] = pos1[gid];
 
     /*
     float dt = 0.002;
