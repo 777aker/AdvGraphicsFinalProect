@@ -16,7 +16,7 @@ uniform int buf;
 
 vec3 lighting() {
 	// ambient (multiply by color)
-	vec3 light = vec3(.2, .2, .2) * color.xyz;
+	vec3 light = color.xyz;
 	// light intensity
 	light += vec3(.6, .6, .6) * dot(vec4(3.0, 3.0, 3.0, 1.0), Vertex) * color.xyz;
 	// return 

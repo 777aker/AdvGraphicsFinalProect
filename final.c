@@ -18,6 +18,7 @@ pgup/pgdn - zoom in and out
 double dim = 50; // size of the world
 int th = 0; // azimuth of view angle
 int ph = 0; // elevation of view angle
+int fov = 57;
 int nw, ng; // work group size and count
 int n; // number of particles
 double asp = 1; // aspect ratio
@@ -30,6 +31,9 @@ unsigned int velbuf2;
 unsigned int colbuf; // color buffer
 int buf; // buffer value
 int mode = 0;
+int maxmodes = 3;
+
+bool movement = true; // for testing
 
 typedef struct {
 	union { float x; float r; };
@@ -73,19 +77,41 @@ void ResetParticles() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
 	pos1 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++) {
-		if (mode == 0) {
+		switch (mode) {
+		case 0:
 			if (i % 10 == 0) {
-				pos1[i].x = frand(-50, 50);
+				pos1[i].x = i * 3 - 50;
 				pos1[i].y = -20;
-				pos1[i].z = frand(-50, 50);
+				pos1[i].z = 0;
 				pos1[i].w = 1;
 			}
 			else {
-				pos1[i].x = frand(-100, 100);
-				pos1[i].y = frand(-10, 50);
-				pos1[i].z = frand(-100, 100);
+				pos1[i].x = i * 3 - 200;
+				pos1[i].y = 20;
+				pos1[i].z = 0;
 				pos1[i].w = 1;
 			}
+			break;
+		case 1:
+			if (i % 10 == 0) {
+				pos1[i].x = i * 3 - 50;
+				pos1[i].y = -20;
+				pos1[i].z = 0;
+				pos1[i].w = 1;
+			}
+			else {
+				pos1[i].x = i * 3 - 211;
+				pos1[i].y = 20;
+				pos1[i].z = 0;
+				pos1[i].w = 1;
+			}
+			break;
+		case 2:
+			pos1[i].x = frand(-100, 100);
+			pos1[i].y = frand(-100, 100);
+			pos1[i].z = frand(-100, 100);
+			pos1[i].w = 1;
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -105,7 +131,8 @@ void ResetParticles() {
 	vel1 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++)
 	{
-		if (mode == 0) {
+		switch (mode) {
+		case 0:
 			if (i % 10 == 0) {
 				vel1[i].x = 0;
 				vel1[i].y = 0;
@@ -114,10 +141,31 @@ void ResetParticles() {
 			}
 			else {
 				vel1[i].x = 0;
-				vel1[i].y = .05;
+				vel1[i].y = -8;
 				vel1[i].z = 0;
 				vel1[i].w = 0;
 			}
+			break;
+		case 1:
+			if (i % 10 == 0) {
+				vel1[i].x = 0;
+				vel1[i].y = 0;
+				vel1[i].z = 0;
+				vel1[i].w = 0;
+			}
+			else {
+				vel1[i].x = 0;
+				vel1[i].y = -8;
+				vel1[i].z = 0;
+				vel1[i].w = 0;
+			}
+			break;
+		case 2:
+			vel1[i].x = frand(-2, 2);
+			vel1[i].y = frand(-2, 2);
+			vel1[i].z = frand(-2, 2);
+			vel1[i].w = 0;
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -231,16 +279,19 @@ void InitParticles() {
 void DrawParticles() {
 	// set shader
 	glUseProgram(colorshader);
+	// eye stuff
+	float Ex = -2 * dim * Sin(th) * Cos(ph);
+	float Ey = +2 * dim * Sin(ph);
+	float Ez = +2 * dim * Cos(th) * Cos(ph);
 
 	// projection matrix
 	float proj[16];
 	mat4identity(proj);
-	mat4ortho(proj, -dim * asp, +dim * asp, -dim, +dim, -dim, +dim);
+	mat4perspective(proj, fov, asp, dim / 16, 16 * dim);
 	// view matrix
 	float view[16];
 	mat4identity(view);
-	mat4rotate(view, ph, 1, 0, 0);
-	mat4rotate(view, th, 0, 1, 0);
+	mat4lookAt(view, Ex, Ey, Ez, 0, 0, 0, 0, Cos(ph), 0);
 	// modelview matrix
 	float modelview[16];
 	mat4copy(modelview, view);
@@ -296,7 +347,8 @@ void display(GLFWwindow* window) {
 	View(th, ph, 55, dim);
 
 	// compute shader
-	compute();
+	if(movement)
+		compute();
 
 	// draw the particles
 	DrawParticles();
@@ -343,6 +395,12 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	// page down
 	else if (key == GLFW_KEY_PAGE_UP && dim > 5)
 		dim -= 5;
+	else if (key == GLFW_KEY_M) {
+		mode = (mode + 1) % maxmodes;
+		ResetParticles();
+	}
+	else if (key == GLFW_KEY_SPACE)
+		movement = !movement;
 
 	// keep angles +/-360
 	th %= 360;
