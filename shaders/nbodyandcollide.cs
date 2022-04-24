@@ -9,18 +9,13 @@ layout(binding = 7) buffer velbuf2 { vec4 vel2 []; };
 layout(binding = 8) buffer colbuf { vec4 col []; };
 
 // work group size
-layout(local_size_x = 512) in;
+layout(local_size_x = 1024) in;
 
-const float dt = .01;
-const float gforce = .01;
+const float dt = .02;
+const float collisionloss = .8;
 
 // array size
 uniform int n;
-
-vec3 project(vec3 u, vec3 v)
-{
-    return v * (dot(u,v) / dot(v, v));
-}
 
 void gravandcollide(uint effect, int other)
 {
@@ -30,11 +25,11 @@ void gravandcollide(uint effect, int other)
     {
         if(length(c2) < 2)
         {
-            // can put repel here
+            
             return;
         } else
         {
-            vel2[effect].xyz += 1 / (D*D*D) * c2 * gforce;
+            vel2[effect].xyz += 1 / (D*D*D) * c2 * dt;
             return;
         }
     }
@@ -44,8 +39,8 @@ void gravandcollide(uint effect, int other)
     
     // wait a sec, you mean it took me 20 hours to figure out this
     // I think i got caught up on the 3d
-    vel2[effect].xyz += c1 * dot(c1, vel1[other].xyz) * .9;
-    vel2[effect].xyz -= c2 * dot(c2, vel1[effect].xyz) * .9;
+    vel2[effect].xyz += c1 * dot(c1, vel1[other].xyz) * collisionloss;
+    vel2[effect].xyz -= c2 * dot(c2, vel1[effect].xyz) * collisionloss;
     //vel2[effect].xyz -= c1 * vel1[effect].xyz * .8 - c1 * length(vel1[effect].xyz) * .2;
         
     //vel2[effect].xyz += c2 * vel1[other].xyz * .8 + c1 * length(vel1[other].xyz) * .2;

@@ -3,9 +3,6 @@
 * Final Project
 * CSCI 4239/5239 Spring 2022
 * 
-* Soooo...I could've done what I was originally planning with the whole forest thing, 
-bbuuuttttt, that was really lame to me and felt like I was just putting shaders on my last project 
-and it'd be mostly the same just like, better. And that was lame. So instead, I decided to make a star formation simulator. 
 * 
 * Key bindings:
 esc - quit
@@ -20,6 +17,8 @@ int th = 0; // azimuth of view angle
 int ph = 0; // elevation of view angle
 int fov = 57;
 int nw, ng; // work group size and count
+int maxnw = 1024, maxng = 4; // need to control amount bc we do a lot of math
+// so don't wanna just maximize this bc that's too much math
 int n; // number of particles
 double asp = 1; // aspect ratio
 int computeshader; // compute shader program
@@ -31,7 +30,7 @@ unsigned int velbuf2;
 unsigned int colbuf; // color buffer
 int buf; // buffer value
 int mode = 0;
-int maxmodes = 3;
+int maxmodes = 5;
 
 bool movement = true; // for testing
 
@@ -112,6 +111,46 @@ void ResetParticles() {
 			pos1[i].z = frand(-100, 100);
 			pos1[i].w = 1;
 			break;
+		case 3:
+			if (i % 2 == 0) {
+				pos1[i].x = frand(-100, 25);
+				pos1[i].y = frand(-100, 25);
+				pos1[i].z = frand(-100, 25);
+				pos1[i].w = 1;
+			}
+			else {
+				pos1[i].x = frand(75, 25);
+				pos1[i].y = frand(75, 25);
+				pos1[i].z = frand(75, 25);
+				pos1[i].w = 1;
+			}
+			break;
+		case 4:
+			if (i % 4 == 0) {
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+			}
+			else if (i % 4 == 1) {
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+			}
+			else if (i % 4 == 2) {
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+			}
+			else {
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+			}
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -166,6 +205,18 @@ void ResetParticles() {
 			vel1[i].z = frand(-2, 2);
 			vel1[i].w = 0;
 			break;
+		case 3:
+			vel1[i].x = frand(-2, 2);
+			vel1[i].y = frand(-2, 2);
+			vel1[i].z = frand(-2, 2);
+			vel1[i].w = 0;
+			break;
+		case 4:
+			vel1[i].x = frand(-2, 2);
+			vel1[i].y = frand(-2, 2);
+			vel1[i].z = frand(-2, 2);
+			vel1[i].w = 0;
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -209,8 +260,8 @@ void InitParticles() {
 	// get max workgroup size and count
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &ng);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &nw);
-	if (ng > 16) ng = 4;
-	if (nw > 512) nw = 512;
+	if (ng > maxng) ng = maxng;
+	if (nw > maxnw) nw = maxnw;
 	n = nw * ng;
 
 	// initialize position buffers
@@ -372,8 +423,10 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE)
 		glfwSetWindowShouldClose(window, 1);
 	// reset view angle
-	else if (key == GLFW_KEY_0)
+	else if (key == GLFW_KEY_0) {
 		th = ph = 0;
+		dim = 50;
+	}
 	// reset particles
 	else if (key == GLFW_KEY_R)
 		ResetParticles();
