@@ -22,6 +22,7 @@ int maxnw = 1024, maxng = 4; // need to control amount bc we do a lot of math
 int n; // number of particles
 double asp = 1; // aspect ratio
 int computeshader; // compute shader program
+int shader = 0; // which shader we using
 int colorshader; // shader program
 unsigned int posbuf1; // position buffers
 unsigned int posbuf2;
@@ -30,7 +31,8 @@ unsigned int velbuf2;
 unsigned int colbuf; // color buffer
 int buf; // buffer value
 int mode = 0;
-int maxmodes = 5;
+int maxmodes = 7;
+
 
 bool movement = true; // for testing
 
@@ -151,6 +153,110 @@ void ResetParticles() {
 				pos1[i].w = 1;
 			}
 			break;
+		case 5:
+			switch (i % 8) {
+			case 0:
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+				break;
+			case 1:
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+				break;
+			case 2:
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+				break;
+			case 3:
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+				break;
+			case 4:
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+				break;
+			case 5:
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(75, 125);
+				pos1[i].w = 1;
+				break;
+			case 6:
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+				break;
+			case 7:
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(-125, -75);
+				pos1[i].w = 1;
+				break;
+			}
+			break;
+		case 6:
+			switch (i % 8) {
+			case 0:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 1:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 2:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 3:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 4:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 5:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 6:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 7:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			}
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -172,19 +278,6 @@ void ResetParticles() {
 	{
 		switch (mode) {
 		case 0:
-			if (i % 10 == 0) {
-				vel1[i].x = 0;
-				vel1[i].y = 0;
-				vel1[i].z = 0;
-				vel1[i].w = 0;
-			}
-			else {
-				vel1[i].x = 0;
-				vel1[i].y = -8;
-				vel1[i].z = 0;
-				vel1[i].w = 0;
-			}
-			break;
 		case 1:
 			if (i % 10 == 0) {
 				vel1[i].x = 0;
@@ -200,18 +293,10 @@ void ResetParticles() {
 			}
 			break;
 		case 2:
-			vel1[i].x = frand(-2, 2);
-			vel1[i].y = frand(-2, 2);
-			vel1[i].z = frand(-2, 2);
-			vel1[i].w = 0;
-			break;
 		case 3:
-			vel1[i].x = frand(-2, 2);
-			vel1[i].y = frand(-2, 2);
-			vel1[i].z = frand(-2, 2);
-			vel1[i].w = 0;
-			break;
 		case 4:
+		case 5:
+		case 6:
 			vel1[i].x = frand(-2, 2);
 			vel1[i].y = frand(-2, 2);
 			vel1[i].z = frand(-2, 2);
