@@ -11,7 +11,7 @@ layout(binding = 8) buffer colbuf { vec4 col []; };
 // work group size
 layout(local_size_x = 1024) in;
 
-const float dt = .02;
+const float dt = .01;
 const float collisionloss = .8;
 
 // array size

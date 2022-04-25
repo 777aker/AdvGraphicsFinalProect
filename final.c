@@ -32,7 +32,9 @@ unsigned int colbuf; // color buffer
 int buf; // buffer value
 int mode = 0;
 int maxmodes = 7;
-
+double camx = 0; // camera position
+double camy = 0;
+double camz = 0;
 
 bool movement = true; // for testing
 
@@ -416,9 +418,9 @@ void DrawParticles() {
 	// set shader
 	glUseProgram(colorshader);
 	// eye stuff
-	float Ex = -2 * dim * Sin(th) * Cos(ph);
-	float Ey = +2 * dim * Sin(ph);
-	float Ez = +2 * dim * Cos(th) * Cos(ph);
+	float Ex = -2 * dim * Sin(th) * Cos(ph) + camx;
+	float Ey = +2 * dim * Sin(ph) + camy;
+	float Ez = +2 * dim * Cos(th) * Cos(ph) + camz;
 
 	// projection matrix
 	float proj[16];
@@ -427,7 +429,7 @@ void DrawParticles() {
 	// view matrix
 	float view[16];
 	mat4identity(view);
-	mat4lookAt(view, Ex, Ey, Ez, 0, 0, 0, 0, Cos(ph), 0);
+	mat4lookAt(view, Ex, Ey, Ez, camx, camy, camz, 0, Cos(ph), 0);
 	// modelview matrix
 	float modelview[16];
 	mat4copy(modelview, view);
@@ -511,6 +513,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	else if (key == GLFW_KEY_0) {
 		th = ph = 0;
 		dim = 50;
+		camx = camy = camz = 0;
 	}
 	// reset particles
 	else if (key == GLFW_KEY_R)
@@ -539,6 +542,20 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	}
 	else if (key == GLFW_KEY_SPACE)
 		movement = !movement;
+	else if (key == GLFW_KEY_N)
+		shader = (shader + 1) % 2;
+	else if (key == GLFW_KEY_W)
+		camy += 1;
+	else if (key == GLFW_KEY_S)
+		camy -= 1;
+	else if (key == GLFW_KEY_A)
+		camx -= 1;
+	else if (key == GLFW_KEY_D)
+		camx += 1;
+	else if (key == GLFW_KEY_Q)
+		camz += 1;
+	else if (key == GLFW_KEY_E)
+		camz -= 1;
 
 	// keep angles +/-360
 	th %= 360;

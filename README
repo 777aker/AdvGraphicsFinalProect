@@ -8,6 +8,17 @@ Final Project for Advanced Computer Graphics
 A lot of spheres that collide with each other and do gravity.
 It took way too long, but it looks really fucking cool
 
+Key bindings:
+esc - quit
+0 - reset view
+r - reset particles
+arrows - change view angle
+pgup/pgdn - zoom in and out
+m - change mode
+space - pause/play simulation
+wasdeq - move camera around
+n - change shader
+
 the easiest way to change particle amount (for performance reasons mainly)
 is to change the variable maxng. However, this will cause the program to behave
 differently because more particles = more total energy in the system and less particles
@@ -57,12 +68,3 @@ https://www.vobarian.com/collisions/2dcollisions2.pdf
 2 hour gravity (I was trying different ways but gave up and decided this was best
 3 hours just watching it creating modes and messing around because once it worked,
 it is a beautiful masterpeice that is very fun to watch
-
-Key bindings:
-esc - quit
-0 - reset view
-r - reset particles
-arrows - change view
-pgup/pgdn - zoom in and out
-m - change mode
-space - pause/play simulation
