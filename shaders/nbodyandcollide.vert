@@ -26,7 +26,7 @@ vec3 lighting() {
 void main()
 {
 	//  Remember the color
-	Color = vec4(lighting(), 1.0);
+	Color = vec4(lighting(), 1);
 	//  Translate sphere
 	if(buf == 0) {
 		gl_Position = ProjectionMatrix * ModelViewMatrix * (Vertex + translation1);

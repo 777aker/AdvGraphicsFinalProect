@@ -327,7 +327,7 @@ void ResetParticles() {
 		col[i].r = frand(0.1, .2);
 		col[i].g = frand(0.1, .2);
 		col[i].b = frand(0.4, .2);
-		col[i].a = 1.;
+		col[i].a = 1;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
