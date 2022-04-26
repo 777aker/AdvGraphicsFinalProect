@@ -7,6 +7,7 @@ Final Project for Advanced Computer Graphics
 
 A lot of spheres that collide with each other and do gravity.
 It took way too long, but it looks really freaking cool
+move around, watch some stars collide, hit m a few times to see some
 other cool stars collide
 
 Key bindings:
