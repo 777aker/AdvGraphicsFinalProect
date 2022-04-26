@@ -90,6 +90,7 @@ void ResetParticles() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
 	pos1 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	// based on our mode initialize our positions differently
+	// nothing really special between modes, just a bunch of random different stuff
 	for (int i = 0; i < n; i++) {
 		switch (mode) {
 		case 0:
@@ -273,16 +274,28 @@ void ResetParticles() {
 		case 7:
 			switch (i % 4) {
 			case 0:
-
+				pos1[i].x = frand(-25, 25);
+				pos1[i].y = frand(-25, 25);
+				pos1[i].z = frand(-25, 25);
+				pos1[i].w = 1;
 				break;
 			case 1:
-
+				pos1[i].x = frand(-100, -150);
+				pos1[i].y = frand(-25, 25);
+				pos1[i].z = frand(-25, 25);
+				pos1[i].w = 1;
 				break;
 			case 2:
-
+				pos1[i].x = Sin(i) * frand(175, 225);
+				pos1[i].y = frand(-10, 10);
+				pos1[i].z = Cos(i) * frand(175, 225);
+				pos1[i].w = 1;
 				break;
 			case 3:
-
+				pos1[i].x = frand(-400, 400);
+				pos1[i].y = frand(-400, 400);
+				pos1[i].z = frand(-400, 400);
+				pos1[i].w = 1;
 				break;
 			}
 			break;
@@ -334,20 +347,16 @@ void ResetParticles() {
 			vel1[i].w = 0;
 			break;
 		case 7:
-			switch (i % 4) {
-			case 0:
-
-				break;
-			case 1:
-
-				break;
-			case 2:
-
-				break;
-			case 3:
-
-				break;
-			break;
+			if (pos1[i].z != 0)
+				vel1[i].x = -(pos1[i].z / fabs(pos1[i].z)) * frand(1, 4);
+			else
+				vel1[i].x = 0;
+			vel1[i].y = frand(-1, 1);
+			if (pos1[i].z != 0)
+				vel1[i].z = (pos1[i].x / fabs(pos1[i].x)) * frand(1, 4);
+			else
+				vel1[i].z = 0;
+			vel1[i].w = 0;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
