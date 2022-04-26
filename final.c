@@ -2,17 +2,25 @@
 * Kelley Kelley
 * Final Project
 * CSCI 4239/5239 Spring 2022
-* 
-* 
-* Key bindings:
+
+Final Project for Advanced Computer Graphics
+
+A lot of spheres that collide with each other and do gravity.
+It took way too long, but it looks really freaking cool
+other cool stars collide
+
+Key bindings:
 esc - quit
 0 - reset view
 r - reset particles
-arrows - change view
+arrows - change view angle
 pgup/pgdn - zoom in and out
+m - change mode
+space - pause/play simulation
+wasdeq - move camera around
 */
 #include "mylib.h"
-double dim = 50; // size of the world
+double dim = 80; // size of the world
 int th = 0; // azimuth of view angle
 int ph = 0; // elevation of view angle
 int fov = 57;
@@ -22,21 +30,20 @@ int maxnw = 1024, maxng = 4; // need to control amount bc we do a lot of math
 int n; // number of particles
 double asp = 1; // aspect ratio
 int computeshader; // compute shader program
-int shader = 0; // which shader we using
 int colorshader; // shader program
 unsigned int posbuf1; // position buffers
 unsigned int posbuf2;
-unsigned int velbuf1; // double buffer
+unsigned int velbuf1; // velocity buffers
 unsigned int velbuf2;
 unsigned int colbuf; // color buffer
 int buf; // buffer value
-int mode = 0;
-int maxmodes = 7;
+int mode = 4; // start in mode 4 because that one is my absolute favorite
+int maxmodes = 8;
 double camx = 0; // camera position
 double camy = 0;
 double camz = 0;
 
-bool movement = true; // for testing
+bool movement = true; // for testing, hit space and pauses physics which is nice
 
 typedef struct {
 	union { float x; float r; };
@@ -45,6 +52,8 @@ typedef struct {
 	union { float w; float a; };
 } vec4;
 
+// pretty self explanatory
+// an icosahedrons data for instancing
 const float icosahedron_data[] = {
 	0.894, 0.000, 0.447, 1,		0.724, 0.526,-0.447, 1,		0.724,-0.526,-0.447, 1,
 	0.276,-0.851, 0.447, 1,		0.724,-0.526,-0.447, 1,		-0.276,-0.851,-0.447, 1,
@@ -79,6 +88,7 @@ void ResetParticles() {
 	// reset position
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf1);
 	pos1 = (vec4*) glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	// based on our mode initialize our positions differently
 	for (int i = 0; i < n; i++) {
 		switch (mode) {
 		case 0:
@@ -259,10 +269,27 @@ void ResetParticles() {
 				break;
 			}
 			break;
+		case 7:
+			switch (i % 4) {
+			case 0:
+
+				break;
+			case 1:
+
+				break;
+			case 2:
+
+				break;
+			case 3:
+
+				break;
+			}
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
+	// set our second position buffer to be exactly the same as the first
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, posbuf2);
 	pos2 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++) {
@@ -276,6 +303,7 @@ void ResetParticles() {
 	//  Reset velocities
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf1);
 	vel1 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	// depending on mode, do velocities differently
 	for (int i = 0; i < n; i++)
 	{
 		switch (mode) {
@@ -304,10 +332,26 @@ void ResetParticles() {
 			vel1[i].z = frand(-2, 2);
 			vel1[i].w = 0;
 			break;
+		case 7:
+			switch (i % 4) {
+			case 0:
+
+				break;
+			case 1:
+
+				break;
+			case 2:
+
+				break;
+			case 3:
+
+				break;
+			break;
 		}
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
+	// copy velocity 1 into velocity 2
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, velbuf2);
 	vel2 = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, n * sizeof(vec4), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	for (int i = 0; i < n; i++)
@@ -347,6 +391,7 @@ void InitParticles() {
 	// get max workgroup size and count
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &ng);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &nw);
+	// clamp them, my simulation dies if there are too many particles
 	if (ng > maxng) ng = maxng;
 	if (nw > maxnw) nw = maxnw;
 	n = nw * ng;
@@ -379,6 +424,7 @@ void InitParticles() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(icosahedron_data), icosahedron_data, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
+	// intialize our vertices for the icosahedron
 	glUseProgram(colorshader);
 	glGenVertexArrays(1, &icoVAO);
 	glBindVertexArray(icoVAO);
@@ -387,6 +433,8 @@ void InitParticles() {
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
 
+	// intialize our translation arrays and attribute divisor them by one
+	// so each icosahedron uses the same data to move it
 	glBindBuffer(GL_ARRAY_BUFFER, posbuf1);
 	loc = glGetAttribLocation(colorshader, "translation1");
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
@@ -397,19 +445,18 @@ void InitParticles() {
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
 	glVertexAttribDivisor(loc, 1);
-
+	// same thing with color as translation
 	glBindBuffer(GL_ARRAY_BUFFER, colbuf);
 	loc = glGetAttribLocation(colorshader, "color");
 	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 0, (void*)0);
 	glEnableVertexAttribArray(loc);
 	glVertexAttribDivisor(loc, 1);
-	
+	// reset everything
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
 	glUseProgram(0);
 
-	// reset buffer positions
+	// reset particle positions / this is the first time so kinda set them in the first place
 	ResetParticles();
 }
 
@@ -434,7 +481,7 @@ void DrawParticles() {
 	float modelview[16];
 	mat4copy(modelview, view);
 	mat4translate(modelview, 0, 0, 0.5);
-
+	// pass to vertex shader
 	int id = glGetUniformLocation(colorshader, "ProjectionMatrix");
 	glUniformMatrix4fv(id, 1, 0, proj);
 	id = glGetUniformLocation(colorshader, "ModelViewMatrix");
@@ -454,6 +501,8 @@ void DrawParticles() {
 // run compute shader
 void compute() {
 	glUseProgram(computeshader);
+	// rather than switch which one the compute shader is effecting which seems
+	// dumb and much more complicated, just switch what we send to the compute shader
 	if (buf) {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, posbuf2);
@@ -466,7 +515,9 @@ void compute() {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, velbuf1);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, velbuf2);
 	}
+	// switch which one is our base buffer for positions and velocities
 	buf = (buf + 1) % 2;
+	// tell compute shader how many particles we got
 	int id = glGetUniformLocation(computeshader, "n");
 	//printf("%i", n);
 	glUniform1i(id, n);
@@ -485,6 +536,8 @@ void display(GLFWwindow* window) {
 	View(th, ph, 55, dim);
 
 	// compute shader
+	// rather than do anything like actually pausing or some complicated nonsense, just don't 
+	// run the compute shader which is where all the math happens
 	if(movement)
 		compute();
 
@@ -509,7 +562,7 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	// exit on esc
 	if (key == GLFW_KEY_ESCAPE)
 		glfwSetWindowShouldClose(window, 1);
-	// reset view angle
+	// reset view
 	else if (key == GLFW_KEY_0) {
 		th = ph = 0;
 		dim = 50;
@@ -536,14 +589,15 @@ void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	// page down
 	else if (key == GLFW_KEY_PAGE_UP && dim > 5)
 		dim -= 5;
+	// change how we initialize particles and reset them all
 	else if (key == GLFW_KEY_M) {
 		mode = (mode + 1) % maxmodes;
 		ResetParticles();
 	}
+	// pause the simulation
 	else if (key == GLFW_KEY_SPACE)
 		movement = !movement;
-	else if (key == GLFW_KEY_N)
-		shader = (shader + 1) % 2;
+	// move the camera origin / look at point around
 	else if (key == GLFW_KEY_W)
 		camy += 1;
 	else if (key == GLFW_KEY_S)

@@ -2,6 +2,7 @@
 //  nBody geometry shader
 //  Billboards point to quad
 //
+// I actually changed to instanced spheres so this is no longer relevant
 
 #version 150 compatibility
 #extension GL_EXT_geometry_shader4 : enable

@@ -1,6 +1,7 @@
 // http://www.science-and-fiction.org/rendering/noise.html
 // I use their noise in like every homework so it's about time I just
 // actually make a file of a bunch of noise
+// I made it finally, but then didn't even use it :/
 #include "mylib.h"
 
 float rand2D(float x, float y) {
