@@ -18,7 +18,7 @@ vec3 lighting() {
 	// ambient (multiply by color)
 	vec3 light = color.xyz;
 	// light intensity
-	light += vec3(.6, .6, .6) * dot(vec4(3.0, 3.0, 3.0, 1.0), Vertex) * color.xyz;
+	light += vec3(.6, .6, .6) * clamp(dot(vec4(3.0, 3.0, 3.0, 1.0), Vertex), .1, 10) * color.xyz;
 	// return 
 	return light;
 }

@@ -14,6 +14,8 @@ layout(local_size_x = 1024) in;
 const float dt = .01;
 const float collisionloss = .8;
 
+const float rgain = .1;
+
 // array size
 uniform int n;
 
@@ -23,6 +25,7 @@ void gravandcollide(uint effect, int other)
     float D = length(c2 + vel1[other].xyz * dt - vel1[effect].xyz * dt);
     if(D > 2)
     {
+        //col[effect].r -= 1 * rloss;
         if(length(c2) < 2)
         {
             
@@ -46,6 +49,7 @@ void gravandcollide(uint effect, int other)
     //vel2[effect].xyz += c2 * vel1[other].xyz * .8 + c1 * length(vel1[other].xyz) * .2;
 
     pos2[effect].xyz += c1 * (2 - D) * 1.2;
+    col[effect].r += 1 * rgain;
 
     return;
 }
@@ -58,7 +62,7 @@ void main()
 
     vel2[gid].xyz = vel1[gid].xyz;
     pos2[gid].xyz = pos1[gid].xyz;
-    
+    col[gid].r = .2;
     //bool collided = false;
 
     for(int i = 0; i < n; i++)
@@ -71,6 +75,8 @@ void main()
 
     pos2[gid].xyz += vel2[gid].xyz * dt;
     
+    col[gid].r = clamp(col[gid].r, .1, 1);
+    col[gid].r -= .1;
 }
 
 /*

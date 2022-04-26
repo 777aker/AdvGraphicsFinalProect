@@ -6,7 +6,7 @@ CSCI 4239/5239 Spring 2022
 Final Project for Advanced Computer Graphics
 
 A lot of spheres that collide with each other and do gravity.
-It took way too long, but it looks really fucking cool
+It took way too long, but it looks really freaking cool
 
 Key bindings:
 esc - quit
@@ -25,7 +25,7 @@ differently because more particles = more total energy in the system and less pa
 = less total energy in the system so if there are more particles your stars explode a lot
 and if there are less they are pretty stable
 
-Time spent: hr
+Time spent: 45 hr
 2 hrs doing the last project, then getting bored and deleting it all
 4 hrs transferring ex22 and ex19 into this and messing with different ways to split up the work (was trying to do x y z all on different threads but slowed it down more)
 2 hrs relearning physics and totally not understanding how to do 3d collisions
@@ -68,3 +68,4 @@ https://www.vobarian.com/collisions/2dcollisions2.pdf
 2 hour gravity (I was trying different ways but gave up and decided this was best
 3 hours just watching it creating modes and messing around because once it worked,
 it is a beautiful masterpeice that is very fun to watch
+8 hours messing around, making new modes, seeing what happens, I just have a really cool simulation now so I'm playing with it a lot and tweaking things
