@@ -19,7 +19,7 @@ vec3 lighting() {
 	// ambient (multiply by color)
 	vec3 light = color.xyz;
 	// light intensity (fake it bc don't need good lighting, need fast lighting)
-	light += vec3(.6, .6, .6) * clamp(dot(vec4(3.0, 3.0, 3.0, 1.0), Vertex), .1, 10) * color.xyz;
+	light += vec3(.6, .6, .6) * clamp(dot(vec3(3.0, 3.0, 3.0), normalize(Vertex.xyz)), .1, 10.0) * color.xyz;
 	// return 
 	return light;
 }

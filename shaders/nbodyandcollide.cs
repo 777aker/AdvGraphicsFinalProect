@@ -100,7 +100,7 @@ void main()
     // update position with our new velocity
     pos2[gid].xyz += vel2[gid].xyz * dt;
     // clamp our color bc it can go insane in either direction if you don't
-    col[gid].r = clamp(col[gid].r, .1, 1);
+    col[gid].r = clamp(col[gid].r, .1, 1.0);
     // subtract a nice one every frame so if it hasn't collided in a little bit
     // it just goes back to 0
     col[gid].r -= .1;
