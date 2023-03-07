@@ -26,7 +26,7 @@ int th = 0; // azimuth of view angle
 int ph = 0; // elevation of view angle
 int fov = 57;
 int nw, ng; // work group size and count
-int maxnw = 1024, maxng = 4; // need to control amount bc we do a lot of math
+int maxnw = 1024, maxng = 10; // need to control amount bc we do a lot of math
 // so don't wanna just maximize this bc that's too much math
 int n; // number of particles
 double asp = 1; // aspect ratio
@@ -656,7 +656,7 @@ int CreateShaderProgCompute(char* file) {
 // main program, the beginning of it all
 int main(int argc, char* argv[]) {
 	// initialize GLFW
-	GLFWwindow* window = InitWindow("Kelley Kelley Final Project", 0, 600, 600, &reshape, &key);
+	GLFWwindow* window = InitWindow("Kelley Kelley Final Project", 1, 600, 600, &reshape, &key);
 
 	// compute shader
 	computeshader = CreateShaderProgCompute("shaders/nbodyandcollide.cs");
