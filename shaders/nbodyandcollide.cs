@@ -54,11 +54,9 @@ void gravandcollide(uint effect, int other)
     // so now we also need the other guys normal to add to ourself
     vec3 c1 = normalize(pos1[effect].xyz - pos1[other].xyz);
     // also normalize ourself, waited till after if statement
-    // bc most of the time we can skip this expensive nonsense which is nice
+    // bc most of the time we can skip this expensive step which is nice
     c2 = normalize(c2);
     
-    // wait a sec, you mean it took me 20 hours to figure out this
-    // I think i got caught up on the 3d, this sucks
     // take our velocity add to it the velocity of the other guy projected
     // in the direction of the collision and subtract from our velocity
     // what we give to the other guy. subtract our velocity in direction
@@ -66,10 +64,9 @@ void gravandcollide(uint effect, int other)
     vel2[effect].xyz += c1 * dot(c1, vel1[other].xyz) * collisionloss;
     vel2[effect].xyz -= c2 * dot(c2, vel1[effect].xyz) * collisionloss;
     //vel2[effect].xyz -= c1 * vel1[effect].xyz * .8 - c1 * length(vel1[effect].xyz) * .2;
-        
     //vel2[effect].xyz += c2 * vel1[other].xyz * .8 + c1 * length(vel1[other].xyz) * .2;
-    // move the objects every so slightly away from each other so funky
-    // nonsense doesn't happen and they are no longer colliding
+    // move the objects every so slightly away from each other so
+    // weird math doesn't happen and they are no longer colliding
     pos2[effect].xyz += c1 * (2 - D) * 1.2;
     // there was a collision so increase our r value a little
     col[effect].r += 1 * rgain;
@@ -106,7 +103,8 @@ void main()
     col[gid].r -= .1;
 }
 
-/* this is some bad math that makes no sense and doesn't work
+/* this is some bad math ie: the orthogonal attempt
+ * 
     vec3 D = pos1[other].xyz - pos1[effect].xyz;
     vec3 DV = vel1[other].xyz - vel1[effect].xyz;
     vec3 DVD = abs(D + DV);
@@ -167,7 +165,7 @@ void main()
 
     return true;
     */
-/* this is some old gravity and collision code
+/* this is some old gravity and collision code that acts weird and is sometimes fun to look at
     float dt = 0.002;
     vec3 F = vec3(0,0,0);
     float density = 0;

@@ -6,9 +6,9 @@
 Final Project for Advanced Computer Graphics
 
 A lot of spheres that collide with each other and do gravity.
-It took way too long, but it looks really freaking cool
+It looks really cool
 move around, watch some stars collide, hit m a few times to see some
-other cool stars collide
+other cool stuff
 
 Key bindings:
 esc - quit
@@ -38,8 +38,8 @@ unsigned int velbuf1; // velocity buffers
 unsigned int velbuf2;
 unsigned int colbuf; // color buffer
 int buf; // buffer value
-int mode = 4; // start in mode 4 because that one is my absolute favorite
-int maxmodes = 8;
+int mode = 0; // start in mode 4 because that one is my absolute favorite
+int maxmodes = 13;
 double camx = 0; // camera position
 double camy = 0;
 double camz = 0;
@@ -122,12 +122,18 @@ void ResetParticles() {
 			}
 			break;
 		case 2:
+			pos1[i].x = Cos(i) * frand(-1000, 1000);
+			pos1[i].y = Sin(i) * frand(-1000, 1000);
+			pos1[i].z = 0;
+			pos1[i].w = 1;
+			break;
+		case 3:
 			pos1[i].x = frand(-100, 100);
 			pos1[i].y = frand(-100, 100);
 			pos1[i].z = frand(-100, 100);
 			pos1[i].w = 1;
 			break;
-		case 3:
+		case 4:
 			if (i % 2 == 0) {
 				pos1[i].x = frand(-100, 25);
 				pos1[i].y = frand(-100, 25);
@@ -141,7 +147,7 @@ void ResetParticles() {
 				pos1[i].w = 1;
 			}
 			break;
-		case 4:
+		case 5:
 			if (i % 4 == 0) {
 				pos1[i].x = frand(-125, -75);
 				pos1[i].y = frand(-125, -75);
@@ -167,111 +173,111 @@ void ResetParticles() {
 				pos1[i].w = 1;
 			}
 			break;
-		case 5:
-			switch (i % 8) {
-			case 0:
-				pos1[i].x = frand(75, 125);
-				pos1[i].y = frand(75, 125);
-				pos1[i].z = frand(75, 125);
-				pos1[i].w = 1;
-				break;
-			case 1:
-				pos1[i].x = frand(-125, -75);
-				pos1[i].y = frand(75, 125);
-				pos1[i].z = frand(75, 125);
-				pos1[i].w = 1;
-				break;
-			case 2:
-				pos1[i].x = frand(-125, -75);
-				pos1[i].y = frand(-125, -75);
-				pos1[i].z = frand(75, 125);
-				pos1[i].w = 1;
-				break;
-			case 3:
-				pos1[i].x = frand(-125, -75);
-				pos1[i].y = frand(75, 125);
-				pos1[i].z = frand(-125, -75);
-				pos1[i].w = 1;
-				break;
-			case 4:
-				pos1[i].x = frand(75, 125);
-				pos1[i].y = frand(-125, -75);
-				pos1[i].z = frand(-125, -75);
-				pos1[i].w = 1;
-				break;
-			case 5:
-				pos1[i].x = frand(75, 125);
-				pos1[i].y = frand(-125, -75);
-				pos1[i].z = frand(75, 125);
-				pos1[i].w = 1;
-				break;
-			case 6:
-				pos1[i].x = frand(75, 125);
-				pos1[i].y = frand(75, 125);
-				pos1[i].z = frand(-125, -75);
-				pos1[i].w = 1;
-				break;
-			case 7:
-				pos1[i].x = frand(-125, -75);
-				pos1[i].y = frand(-125, -75);
-				pos1[i].z = frand(-125, -75);
-				pos1[i].w = 1;
-				break;
-			}
-			break;
 		case 6:
 			switch (i % 8) {
 			case 0:
-				pos1[i].x = frand(25, 50);
-				pos1[i].y = frand(25, 50);
-				pos1[i].z = frand(25, 50);
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(75, 125);
 				pos1[i].w = 1;
 				break;
 			case 1:
-				pos1[i].x = frand(-50, -25);
-				pos1[i].y = frand(25, 50);
-				pos1[i].z = frand(25, 50);
+				pos1[i].x = frand(0, 50);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(75, 125);
 				pos1[i].w = 1;
 				break;
 			case 2:
-				pos1[i].x = frand(-50, -25);
-				pos1[i].y = frand(-50, -25);
-				pos1[i].z = frand(25, 50);
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(0, 50);
+				pos1[i].z = frand(75, 125);
 				pos1[i].w = 1;
 				break;
 			case 3:
-				pos1[i].x = frand(-50, -25);
-				pos1[i].y = frand(25, 50);
-				pos1[i].z = frand(-50, -25);
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(0, 50);
 				pos1[i].w = 1;
 				break;
 			case 4:
-				pos1[i].x = frand(25, 50);
-				pos1[i].y = frand(-50, -25);
-				pos1[i].z = frand(-50, -25);
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(-125, -75);
 				pos1[i].w = 1;
 				break;
 			case 5:
-				pos1[i].x = frand(25, 50);
-				pos1[i].y = frand(-50, -25);
-				pos1[i].z = frand(25, 50);
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(75, 125);
 				pos1[i].w = 1;
 				break;
 			case 6:
-				pos1[i].x = frand(25, 50);
-				pos1[i].y = frand(25, 50);
-				pos1[i].z = frand(-50, -25);
+				pos1[i].x = frand(75, 125);
+				pos1[i].y = frand(75, 125);
+				pos1[i].z = frand(-125, -75);
 				pos1[i].w = 1;
 				break;
 			case 7:
-				pos1[i].x = frand(-50, -25);
-				pos1[i].y = frand(-50, -25);
-				pos1[i].z = frand(-50, -25);
+				pos1[i].x = frand(-125, -75);
+				pos1[i].y = frand(-125, -75);
+				pos1[i].z = frand(-125, -75);
 				pos1[i].w = 1;
 				break;
 			}
 			break;
 		case 7:
+			switch (i % 8) {
+			case 0:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 1:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 2:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 3:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 4:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 5:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(25, 50);
+				pos1[i].w = 1;
+				break;
+			case 6:
+				pos1[i].x = frand(25, 50);
+				pos1[i].y = frand(25, 50);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			case 7:
+				pos1[i].x = frand(-50, -25);
+				pos1[i].y = frand(-50, -25);
+				pos1[i].z = frand(-50, -25);
+				pos1[i].w = 1;
+				break;
+			}
+			break;
+		case 8:
 			switch (i % 4) {
 			case 0:
 				pos1[i].x = frand(-25, 25);
@@ -299,7 +305,24 @@ void ResetParticles() {
 				break;
 			}
 			break;
+		case 9:
+			pos1[i].x = Cos(i) * frand(-1000, 1000);
+			pos1[i].y = Sin(i) * frand(-1000, 1000);
+			pos1[i].z = tan(i) * frand(-1000, 1000);
+			pos1[i].w = 1;
+			break;
+		case 10:
+			// actual nebula attempt
+		case 11:
+		case 12:
+			// velocity attempt time
+			pos1[i].x = Cos(i) * frand(-800, 800);
+			pos1[i].y = Sin(i) * frand(-800, 800);
+			pos1[i].z = frand(-20, 20);
+			pos1[i].w = 1;
+			break;
 		}
+		pos1[i].w = 1;
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -337,16 +360,39 @@ void ResetParticles() {
 			}
 			break;
 		case 2:
+			vel1[i].x = 0;
+			vel1[i].y = 0;
+			vel1[i].z = 0;
+			vel1[i].w = 0;
+			break;
+		case 6:
+			switch (i % 4) {
+			case 0:
+			case 1:
+				vel1[i].x = frand(-2, 2);
+				vel1[i].y = frand(-8, 0);
+				vel1[i].z = frand(-2, 2);
+				vel1[i].w = 0;
+				break;
+			case 2:
+			case 3:
+				vel1[i].x = frand(-2, -2);
+				vel1[i].y = frand(0, 5);
+				vel1[i].z = frand(-2, 2);
+				vel1[i].w = 0;
+				break;
+			}
+			break;
 		case 3:
 		case 4:
 		case 5:
-		case 6:
+		case 7:
 			vel1[i].x = frand(-2, 2);
 			vel1[i].y = frand(-2, 2);
 			vel1[i].z = frand(-2, 2);
 			vel1[i].w = 0;
 			break;
-		case 7:
+		case 8:
 			if (pos1[i].z != 0)
 				vel1[i].x = -(pos1[i].z / fabs(pos1[i].z)) * frand(1, 4);
 			else
@@ -357,7 +403,59 @@ void ResetParticles() {
 			else
 				vel1[i].z = 0;
 			vel1[i].w = 0;
+		case 10:
+			// actual nebula attempt
+			vel1[i].x = 0;
+			vel1[i].y = 0;
+			vel1[i].z = 0;
+			vel1[i].w = 0;
+			break;
+		case 11:
+			/*
+			vec4 *z_normal;
+			z_normal->x = 0;
+			z_normal->y = 0;
+			z_normal->z = 1;
+			z_normal->w = 0;
+			vec4* vel_dir;
+			vel_dir->x = 0 - pos1[i].y;
+			vel_dir->y = pos1[i].x - 0;
+			vel_dir->z = 0 - 0;
+			*/
+			vel1[i].x = pos1[i].y;
+			vel1[i].y = pos1[i].x;
+			vel1[i].z = 0;
+			vel1[i].w = 0;
+			break;
+		case 12:
+			if ((pos1[i].y < 1 && pos1[i].y > -1) || (pos1[i].x < 1 && pos1[i].x > -1)) {
+				vel1[i].x = 0;
+				vel1[i].y = 0;
+				break;
+			}
+			// ok, we should make normal vectors
+			// make a normal vector of the direction
+			// multiply that by the length
+			// then we're getting distance from 0 in
+			// the direction of movement cool
+			if (pos1[i].y < 1 && pos1[i].y > -1)
+				vel1[i].x = 0;
+			else
+				vel1[i].x = -1000.0 / pos1[i].y;
+			if (pos1[i].x < 1 && pos1[i].x > -1)
+				vel1[i].y = 0;
+			else
+				vel1[i].y = -1000.0 / pos1[i].x;
+			vel1[i].z = 0;
+			vel1[i].w = 0;
+			break;
+		default:
+			vel1[i].x = 0;
+			vel1[i].y = 0;
+			vel1[i].z = 0;
+			vel1[i].w = 0;
 		}
+		
 	}
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -472,6 +570,7 @@ void InitParticles() {
 
 // draw the particles
 void DrawParticles() {
+
 	// set shader
 	glUseProgram(colorshader);
 	// eye stuff
@@ -511,7 +610,7 @@ void DrawParticles() {
 // run compute shader
 void compute() {
 	glUseProgram(computeshader);
-	// rather than switch which one the compute shader is effecting which seems
+	// rather than switch which one the compute shader is using which seems
 	// dumb and much more complicated, just switch what we send to the compute shader
 	if (buf) {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, posbuf1);
@@ -550,6 +649,7 @@ void display(GLFWwindow* window) {
 	// run the compute shader which is where all the math happens
 	if(movement)
 		compute();
+		// ^ this is a function not a compute shader - function calls compute shader
 
 	// draw the particles
 	DrawParticles();
@@ -557,7 +657,7 @@ void display(GLFWwindow* window) {
 	glDisable(GL_DEPTH_TEST);
 	// display parameters
 	glWindowPos2i(5, 5);
-	Print("FPS=%d, work groups=%i, work size=%i, Count %i", FramesPerSecond(), ng, nw, n);
+	Print("FPS=%d, work groups=%i, work size=%i, Particle Count %i", FramesPerSecond(), ng, nw, n);
 	// render
 	ErrCheck("display");
 	glFlush();
